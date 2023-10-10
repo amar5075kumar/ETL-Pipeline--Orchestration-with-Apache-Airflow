@@ -22,6 +22,8 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from airflow.sensors.time_delta import TimeDeltaSensor
 from datetime import timedelta
+import traceback
+from airflow.utils.email import send_email
 
 conn = Connection(
     conn_id="AWS_Connection",
@@ -59,6 +61,50 @@ glue_job_name = ['JOB1','JOB2','JOB3','JOB4','JOB5','JOB6','JOB7','JOB8']
 
 role_name='*************'
 
+def send_failure_email(context):
+    """Sends an email with detailed log information when a task fails."""
+    error = str(context['exception'])
+    task_instance = context['task_instance']
+    task_id = task_instance.task_id
+    dag_id = task_instance.dag_id
+    execution_date = task_instance.execution_date.strftime('%Y-%m-%d %H:%M:%S')
+    exception_html = str(context['exception']).replace("\n", "<br>")
+    log_file = os.path.join(context['ti'].log_directory, context['task_instance'].log_filename)
+    log_content = task_instance.log.export_log()
+    
+    html_content = f"""
+        <h2>Hi, This is an automated mail to inform you of the failure that occurred for the following task:</h2>
+        <br>
+        <b>DAG Name</b>: {dag_id}<br>
+        <b>Task Name</b>: {task_id}<br>
+        <br>
+        <h3>Error Traceback:</h3>
+        <p><pre>{traceback.format_exc()}</pre></p>
+        <br>
+        <h3> Error found during execution: </h3>
+        <p>{exception_html}</p>
+        <br>
+        <h3>Error Description: Just in case you are not satisfied yet</h3>
+        <p>{error}</p>
+        <br>
+        <h3>Log Content:</h3>
+        <pre>{log_content}</pre>
+        <br>
+        <h3>Log File Location:</h3>
+        <p>{log_file}</p>
+        <br>
+        Thank you!
+    """
+    subject = "[Airflow] DAG {0} - Task {1}: Failed for {2}".format(context['dag'].dag_id, context['task'].task_id, execution_date)
+    body = "Hi,\n\nTask {0} failed with the following error:\n\n{1}\n\n{2}\n\nTraceback:\n{3}".format(
+        context['task'].task_id, context['exception'], context['ti'].log_url, traceback.format_exc()
+    )
+    send_email(
+        to=default_args['email'],
+        subject=subject,
+        html_content=html_content,
+        body=body,
+    )
 
 # initialize glue client
 glue = boto3.client('glue',region_name='us-east-1')
@@ -67,6 +113,8 @@ default_args = {
     'owner': 'Amar',
     'start_date': datetime(2023, 9, 19),        
     'depends_on_past': False,
+    'email': ['*******************'],
+    'email_on_failure': True,
     'retries': 1,
 }
 
