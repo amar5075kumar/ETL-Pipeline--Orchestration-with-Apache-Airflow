@@ -20,6 +20,11 @@ Before using this DAG, make sure you have the following set up:
 - An `EmptyOperator` task is used to signify the start and end points of the DAG.
 - ![DAG Structure](https://raw.githubusercontent.com/amar5075kumar/ETL-Pipeline--Orchestration-with-Apache-Airflow/main/Images/DAG.png)
 
+## Automated Email
+- Sending the email whenever there is a pipeline failure.
+- The Failure can takes place whenever any of the job fails. This cam lead to failure in pipeline. 
+- So whenever the job is failed respected to that task_id automated email will be generated for the particular job.
+
 **Docker Compose YAML File**: The Docker Compose YAML file is used to set up an Airflow environment with all the necessary services, including the web server, scheduler, and workers. This file is crucial for running Airflow in a containerized environment and should be configured to meet your specific requirements.
 
 ## Usage
