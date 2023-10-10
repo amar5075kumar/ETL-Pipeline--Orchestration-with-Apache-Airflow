@@ -18,7 +18,7 @@ Before using this DAG, make sure you have the following set up:
 - The DAG consists of several Glue job tasks that are executed sequentially.
 - A `TimeDeltaSensor` task is used to introduce waiting periods between Glue job executions.
 - An `EmptyOperator` task is used to signify the start and end points of the DAG.
-- !(https://raw.githubusercontent.com/amar5075kumar/ETL-Pipeline--Orchestration-with-Apache-Airflow/main/Images/DAG.png)
+- ![DAG Structure](https://raw.githubusercontent.com/amar5075kumar/ETL-Pipeline--Orchestration-with-Apache-Airflow/main/Images/DAG.png)
 
 **Docker Compose YAML File**: The Docker Compose YAML file is used to set up an Airflow environment with all the necessary services, including the web server, scheduler, and workers. This file is crucial for running Airflow in a containerized environment and should be configured to meet your specific requirements.
 
